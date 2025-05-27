@@ -11,7 +11,7 @@ $adcombo_api_key = getenv('ADCOMBO_API_KEY') ?: '';
 $adcombo_api_url = 'https://api.adcombo.com/api/v2/';
 
 // URL base do site
-$base_url = getenv('BASE_URL') ?: 'https://ads-trax.onrender.com';
+$base_url = getenv('BASE_URL') ?: 'https://adstrax.com.br';
 
 // Configurações gerais
 $app_name = 'AdStrax';
