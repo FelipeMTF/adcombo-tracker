@@ -1,13 +1,23 @@
+/* Variáveis de cores do logo */
+:root {
+  --primary-color: #0066b3;     /* Azul do logo */
+  --secondary-color: #ff7f00;   /* Laranja do logo */
+  --accent-color: #00a0e9;      /* Azul claro do logo */
+  --text-color: #333333;
+  --light-bg: #f8f9fa;
+  --dark-bg: #343a40;
+}
+
 /* Estilos globais */
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
+    background-color: var(--light-bg);
+    color: var(--text-color);
 }
 
 /* Navbar */
 .navbar {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     padding: 0.8rem 1rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -52,7 +62,7 @@ body {
 
 .card-header {
     background-color: #fff;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 2px solid var(--primary-color);
     font-weight: 600;
     padding: 15px 20px;
 }
@@ -70,39 +80,63 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, #1e3c72, #2a5298);
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
     border: none;
-    box-shadow: 0 4px 10px rgba(30, 60, 114, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 102, 179, 0.3);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(45deg, #2a5298, #1e3c72);
+    background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(30, 60, 114, 0.4);
+    box-shadow: 0 6px 15px rgba(0, 102, 179, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, var(--secondary-color), #ff9933);
+    border: none;
+    box-shadow: 0 4px 10px rgba(255, 127, 0, 0.3);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(45deg, #ff9933, var(--secondary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 127, 0, 0.4);
 }
 
 .btn-outline-primary {
-    color: #1e3c72;
-    border-color: #1e3c72;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .btn-outline-primary:hover {
-    background-color: #1e3c72;
+    background-color: var(--primary-color);
     color: #fff;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-color);
+    text-decoration: none;
 }
 
 /* Estatísticas */
 .stats-card {
     text-align: center;
     padding: 20px;
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    background: linear-gradient(135deg, #fff 0%, var(--light-bg) 100%);
 }
 
 .stats-card .value {
     font-size: 28px;
     font-weight: 700;
     margin: 10px 0;
-    color: #1e3c72;
+    color: var(--primary-color);
 }
 
 .stats-card .label {
@@ -136,9 +170,10 @@ body {
 }
 
 .table th {
-    background-color: #f8f9fa;
+    background-color: var(--light-bg);
     font-weight: 600;
     border-top: none;
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .table td, .table th {
@@ -157,9 +192,23 @@ body {
     border-radius: 20px;
 }
 
+.badge-primary {
+    background-color: var(--primary-color);
+}
+
+.badge-secondary {
+    background-color: var(--secondary-color);
+}
+
+/* Elementos de destaque */
+.highlight {
+    background-color: var(--primary-color);
+    color: white;
+}
+
 /* Footer */
 .footer {
-    background-color: #f8f9fa;
+    background-color: var(--light-bg);
     color: #6c757d;
     padding: 10px 0;
     border-top: 1px solid #e9ecef;
@@ -175,8 +224,8 @@ body {
 }
 
 .form-control:focus {
-    border-color: #1e3c72;
-    box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.25);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 179, 0.25);
 }
 
 .form-label {
@@ -184,7 +233,14 @@ body {
     margin-bottom: 8px;
 }
 
-/* Responsividade */
+/* Logo na sidebar */
+.sidebar-logo {
+    max-width: 180px;
+    height: auto;
+    padding: 10px;
+}
+
+/* Para versão mobile/compacta */
 @media (max-width: 768px) {
     .navbar-brand {
         font-size: 1.2rem;
@@ -196,5 +252,10 @@ body {
     
     .card-body {
         padding: 15px;
+    }
+    
+    .sidebar-collapsed .sidebar-logo {
+        max-width: 40px;
+        transition: all 0.3s;
     }
 }
