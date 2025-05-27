@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="card shadow">
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
-                            <img src="assets/img/logo.png" alt="AdStrax" class="logo mb-4" style="max-height: 80px;">
+                            <img src="/public/assets/images/logo.png" alt="AdStrax" class="logo mb-4" style="max-height: 80px;">
                             <h2>Criar Conta</h2>
                             <p class="text-muted">Preencha os campos abaixo para se registrar</p>
                         </div>
