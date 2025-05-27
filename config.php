@@ -3,7 +3,7 @@
 $db_host = getenv('MYSQLHOST') ?: 'mysql.railway.internal';
 $db_name = getenv('MYSQL_DATABASE') ?: 'railway';
 $db_user = getenv('MYSQLUSER') ?: 'root';
-$db_pass = getenv('MYSQLPASSWORD') ?: '';
+$db_pass = getenv('MYSQL_ROOT_PASSWORD') ?: '';
 $db_port = getenv('MYSQLPORT') ?: '3306';
 
 // Configurações do AdCombo
@@ -11,7 +11,7 @@ $adcombo_api_key = getenv('ADCOMBO_API_KEY') ?: '';
 $adcombo_api_url = 'https://api.adcombo.com/api/v2/';
 
 // URL base do site
-$base_url = getenv('BASE_URL') ?: 'https://adstrax.com.br';
+$base_url = getenv('BASE_URL') ?: 'https://ads-trax.onrender.com';
 
 // Configurações gerais
 $app_name = 'AdStrax';
@@ -40,6 +40,8 @@ try {
         die("Erro na conexão com o banco de dados: " . $e->getMessage());
     }
 }
+
+// Resto do código permanece o mesmo...
 
 // Funções utilitárias
 function generateClickId() {
