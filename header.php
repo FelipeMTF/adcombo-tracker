@@ -11,8 +11,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/png" href="/assets/images/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo-icon.png">
+    <link rel="icon" type="image/png" href="/public/assets/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/public/assets/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? $page_title . ' - ' : ''; ?>AdCombo Tracker</title>
@@ -28,7 +28,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">
-                <img src="assets/images/logo-small.png" alt="AdCombo Tracker" height="40">
+                <img src="/public/assets/images/logo.png" alt="AdCombo Tracker" height="40">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
