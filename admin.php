@@ -128,25 +128,113 @@ $offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="card-body">
                 <p>Configure os seguintes URLs de postback na sua conta AdCombo:</p>
                 
-                <h3 class="h6">Para Leads:</h3>
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status={status}'); ?>" readonly>
-                    <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status={status}'); ?>">Copiar</button>
+                <h3 class="h6 mt-4">Para Leads:</h3>
+                
+                <div class="mb-2">
+                    <label class="form-label">Confirm for initial:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_initial'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_initial'); ?>">Copiar</button>
+                    </div>
                 </div>
                 
-                <h3 class="h6">Para Holds:</h3>
+                <div class="mb-2">
+                    <label class="form-label">Confirm for complete:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_complete'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_complete'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Confirm for loyalty:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_loyalty'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_loyalty'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Confirm for lost deal:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_lost_deal'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_lost_deal'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Confirm for withdrawal:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_withdrawal'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_withdrawal'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Confirm for win:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_win'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=lead&offer_id={offer_id}&click_id={click_id}&status=confirm_win'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <h3 class="h6 mt-4">Para Holds:</h3>
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=hold&offer_id={offer_id}&click_id={click_id}'); ?>" readonly>
                     <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=hold&offer_id={offer_id}&click_id={click_id}'); ?>">Copiar</button>
                 </div>
                 
-                <h3 class="h6">Para Rejeições:</h3>
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason={reason}'); ?>" readonly>
-                    <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason={reason}'); ?>">Copiar</button>
+                <h3 class="h6 mt-4">Para Rejeições:</h3>
+                
+                <div class="mb-2">
+                    <label class="form-label">Reject for initial:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_initial'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_initial'); ?>">Copiar</button>
+                    </div>
                 </div>
                 
-                <h3 class="h6">Para Vendas:</h3>
+                <div class="mb-2">
+                    <label class="form-label">Reject for complete:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_complete'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_complete'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Reject for loyalty:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_loyalty'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_loyalty'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Reject for lost deal:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_lost_deal'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_lost_deal'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Reject for withdrawal:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_withdrawal'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_withdrawal'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="form-label">Reject for win:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_win'); ?>" readonly>
+                        <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=reject&offer_id={offer_id}&click_id={click_id}&reason=reject_win'); ?>">Copiar</button>
+                    </div>
+                </div>
+                
+                <h3 class="h6 mt-4">Para Vendas:</h3>
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" value="<?php echo htmlspecialchars($base_url . '/postback.php?action=sale&offer_id={offer_id}&click_id={click_id}'); ?>" readonly>
                     <button class="btn btn-outline-secondary copy-btn" data-clipboard-text="<?php echo htmlspecialchars($base_url . '/postback.php?action=sale&offer_id={offer_id}&click_id={click_id}'); ?>">Copiar</button>
