@@ -1,13 +1,18 @@
 <?php
-session_start();
-include 'config.php';
-include 'auth.php';
-
-// Se o usuário já estiver logado, redirecionar para o dashboard
-if (isLoggedIn()) {
-    header('Location: dashboard/index.php');
-    exit;
+// Verificar se a sessão já está ativa antes de iniciá-la
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
 }
+
+// Verificar se o usuário está logado
+if (isset($_SESSION['user_id'])) {
+    // Redirecionar para o dashboard
+    header("Location: dashboard.php");
+} else {
+    // Redirecionar para a página de login
+    header("Location: login.php");
+}
+exit;
 ?>
 
 <!DOCTYPE html>
