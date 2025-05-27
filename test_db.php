@@ -9,7 +9,7 @@ echo "<h1>Teste de Conexão com o Banco de Dados</h1>";
 $db_host = getenv('MYSQLHOST') ?: 'mysql.railway.internal';
 $db_name = getenv('MYSQL_DATABASE') ?: 'railway';
 $db_user = getenv('MYSQLUSER') ?: 'root';
-$db_pass = getenv('MYSQLPASSWORD') ?: '';
+$db_pass = getenv('MYSQL_ROOT_PASSWORD') ?: '';
 $db_port = getenv('MYSQLPORT') ?: '3306';
 
 echo "<p><strong>Variáveis de Ambiente:</strong></p>";
