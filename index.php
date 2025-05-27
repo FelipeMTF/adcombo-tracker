@@ -57,7 +57,7 @@ if (isLoggedIn()) {
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="/">
-            <img src="/public/assets/img/logo.png" alt="AdStrax" class="logo">
+            <img src="/public/assets/images/logo.png" alt="AdStrax" class="logo">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -80,7 +80,7 @@ if (isLoggedIn()) {
 
     <div class="hero">
         <div class="container text-center">
-            <img src="/public/assets/img/logo.png" alt="AdStrax" class="logo">
+            <img src="/public/assets/images/logo.png" alt="AdStrax" class="logo">
             <h1>Sistema de Tracking para Afiliados</h1>
             <p class="lead">Monitore cliques, leads, holds e vendas em um único lugar</p>
             <div class="mt-4">
@@ -177,7 +177,7 @@ if (isLoggedIn()) {
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <img src="/public/assets/img/logo.png" alt="AdStrax" height="40" class="mb-3">
+                    <img src="/public/assets/images/logo.png" alt="AdStrax" height="40" class="mb-3">
                     <p>Sistema de tracking personalizado para afiliados do AdCombo.</p>
                 </div>
                 <div class="col-md-3">
