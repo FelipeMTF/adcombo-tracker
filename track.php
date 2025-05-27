@@ -1,26 +1,44 @@
 <?php
-require_once 'config.php';
+include 'config.php';
 
-// Capturar parâmetros da URL
-$click_id = isset($_GET['clickid']) ? $_GET['clickid'] : uniqid();
-$gclid = isset($_GET['gclid']) ? $_GET['gclid'] : '';
-$ad_id = isset($_GET['adId']) ? $_GET['adId'] : '';
-$site_id = isset($_GET['siteId']) ? $_GET['siteId'] : '';
-$traffic_source = isset($_GET['source']) ? $_GET['source'] : 'google';
-$utm_source = isset($_GET['utm_source']) ? $_GET['utm_source'] : 'google';
-$utm_medium = isset($_GET['utm_medium']) ? $_GET['utm_medium'] : 'cpc';
-$utm_campaign = isset($_GET['utm_campaign']) ? $_GET['utm_campaign'] : '';
-$ip_address = $_SERVER['REMOTE_ADDR'];
-$user_agent = $_SERVER['HTTP_USER_AGENT'];
-$timestamp = date('Y-m-d H:i:s');
+// Obter parâmetros da URL
+$offer_id = $_GET['offer_id'] ?? null;
+$sub_id = $_GET['sub_id'] ?? '';
+$source = $_GET['source'] ?? '';
+$campaign = $_GET['campaign'] ?? '';
+$keyword = $_GET['keyword'] ?? '';
 
-// Inserir clique no banco
-$stmt = $pdo->prepare("INSERT INTO clicks (click_id, gclid, ad_id, site_id, traffic_source, utm_source, utm_medium, utm_campaign, timestamp, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->execute([$click_id, $gclid, $ad_id, $site_id, $traffic_source, $utm_source, $utm_medium, $utm_campaign, $timestamp, $ip_address, $user_agent]);
+// Verificar se a oferta existe
+$stmt = $pdo->prepare("SELECT * FROM offers WHERE offer_id = ?");
+$stmt->execute([$offer_id]);
+$offer = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Redirecionar para a landing page com os parâmetros
-$landing_url = getenv('LANDING_URL') ?: 'https://sua-landing-page.com';
-$redirect_url = $landing_url . "?clickid=$click_id&gclid=$gclid&utm_source=$utm_source&utm_medium=$utm_medium&utm_campaign=$utm_campaign";
+if (!$offer) {
+    die("Oferta não encontrada");
+}
+
+// Gerar ID de clique único
+$click_id = uniqid();
+
+// Registrar clique
+$stmt = $pdo->prepare("INSERT INTO clicks (click_id, offer_id, sub_id, source, campaign, keyword, ip, user_agent, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+$stmt->execute([
+    $click_id,
+    $offer_id,
+    $sub_id,
+    $source,
+    $campaign,
+    $keyword,
+    $_SERVER['REMOTE_ADDR'],
+    $_SERVER['HTTP_USER_AGENT']
+]);
+
+// Construir URL de redirecionamento
+$redirect_url = $offer['landing_url'];
+$redirect_url .= (strpos($redirect_url, '?') !== false) ? '&' : '?';
+$redirect_url .= "click_id=$click_id";
+
+// Redirecionar para a landing page
 header("Location: $redirect_url");
 exit;
 ?>
