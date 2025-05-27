@@ -11,6 +11,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <link rel="icon" type="image/png" href="/assets/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/images/logo-icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($page_title) ? $page_title . ' - ' : ''; ?>AdCombo Tracker</title>
