@@ -6,7 +6,7 @@ session_start();
 
 // Verificar se o usuário já está logado
 if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
+    header("Location: /dashboard/index.php");
     exit;
 }
 
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_email'] = $user['email'];
             
             // Redirecionar para o dashboard
-            header("Location: dashboard.php");
+            header("Location: /dashboard/index.php");
             exit;
         } else {
             $errors[] = "Email ou senha incorretos";
