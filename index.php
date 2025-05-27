@@ -84,6 +84,23 @@ $recent_conversions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <div class="sidebar">
+        <div class="sidebar-brand">
+            <a href="/dashboard">
+                <img src="/assets/images/logo.png" alt="AdStrax" class="sidebar-logo">
+            </a>
+        </div>
+        
+        <!-- Resto do menu lateral -->
+        <ul class="sidebar-nav">
+            <li><a href="/dashboard">Dashboard</a></li>
+            <!-- Outros itens do menu -->
+        </ul>
+    </div>
+    
+    <div class="content">
+        <!-- Conteúdo principal -->
+    </div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - AdCombo Tracker</title>
