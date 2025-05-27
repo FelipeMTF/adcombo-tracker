@@ -36,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <div class="login-logo">
+    <img src="/assets/images/logo.png" alt="AdStrax" class="img-fluid" style="max-width: 250px;">
+   <h5 class="mt-3 text-muted">Sistema de Tracking para Afiliados</h5>
+    </div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - AdCombo Tracker</title>
