@@ -1,5 +1,5 @@
 <?php
-// Configurações do banco de dados - valores fixos para teste
+// Configurações do banco de dados
 $db_host = 'tramway.proxy.rlwy.net';
 $db_port = '33459';
 $db_name = 'railway';
@@ -10,7 +10,7 @@ $db_pass = 'VJKFHyGJyaAAJEXoMxwDghkmzLJVebKP';
 $api_key = getenv('ADCOMBO_API_KEY') ?: '12b04b4803215aa842838b0a5dc0caeb';
 
 // Configurações do tracker
-$base_url = getenv('BASE_URL') ?: 'http://localhost';
+$base_url = getenv('BASE_URL') ?: 'https://ads-trax.onrender.com';
 
 // Conexão com o banco de dados
 try {
