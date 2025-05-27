@@ -109,7 +109,7 @@ $chartData = [
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="/dashboard">
-                <img src="/assets/images/logo.png" alt="AdStrax" height="40">
+                <img src="/public/assets/images/logo.png" alt="AdStrax" height="40">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
