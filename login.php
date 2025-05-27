@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-BR">
 <head>
     <div class="login-logo">
-    <img src="/assets/images/logo.png" alt="AdStrax" class="img-fluid" style="max-width: 250px;">
+    <img src="/public/assets/img/logo.png" alt="AdStrax" class="img-fluid" style="max-width: 250px;">
    <h5 class="mt-3 text-muted">Sistema de Tracking para Afiliados</h5>
     </div>
     <meta charset="UTF-8">
@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="logo">
             <!-- Substitua pelo caminho do seu logo -->
-            <img src="assets/images/logo.png" alt="AdCombo Tracker Logo">
+            <img src="/public/assets/img/logo.png" alt="AdCombo Tracker Logo">
         </div>
         
         <h2 class="text-center mb-4">Acesse sua conta</h2>
