@@ -1,31 +1,111 @@
 <?php
 // Configurações do banco de dados
-$db_host = 'tramway.proxy.rlwy.net';
-$db_port = '33459';
-$db_name = 'railway';
-$db_user = 'root';
-$db_pass = 'VJKFHyGJyaAAJEXoMxwDghkmzLJVebKP';
+$db_host = getenv('DB_HOST') ?: 'localhost';
+$db_name = getenv('DB_NAME') ?: 'adstrax_db';
+$db_user = getenv('DB_USER') ?: 'root';
+$db_pass = getenv('DB_PASS') ?: '';
 
-// Configurações da API AdCombo
-$api_key = getenv('ADCOMBO_API_KEY') ?: '12b04b4803215aa842838b0a5dc0caeb';
+// Configurações do AdCombo
+$adcombo_api_key = getenv('ADCOMBO_API_KEY') ?: '';
+$adcombo_api_url = 'https://api.adcombo.com/api/v2/';
 
-// Configurações do tracker
-$base_url = getenv('BASE_URL') ?: 'https://ads-trax.onrender.com';
+// URL base do site
+$base_url = getenv('BASE_URL') ?: 'https://adstrax.com.br';
+
+// Configurações gerais
+$app_name = 'AdStrax';
+$app_version = '1.0.0';
+$app_email = 'contato@adstrax.com.br';
 
 // Conexão com o banco de dados
 try {
-    $dsn = "mysql:host=$db_host;port=$db_port;dbname=$db_name";
-    
-    // Adicionar opções SSL para conexões remotas
-    $options = [
-        PDO::MYSQL_ATTR_SSL_CA => false,
-        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-    ];
-    
-    $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->exec("SET NAMES utf8mb4");
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("Erro de conexão: " . $e->getMessage() . " (Host: $db_host, Port: $db_port, DB: $db_name, User: $db_user)");
+    // Em produção, não exibir a mensagem de erro detalhada
+    if (getenv('APP_ENV') === 'production') {
+        die("Erro na conexão com o banco de dados. Por favor, tente novamente mais tarde.");
+    } else {
+        die("Erro na conexão com o banco de dados: " . $e->getMessage());
+    }
+}
+
+// Funções utilitárias
+function generateClickId() {
+    return uniqid('clk_', true);
+}
+
+function getClientIp() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+}
+
+function getUserAgent() {
+    return $_SERVER['HTTP_USER_AGENT'] ?? '';
+}
+
+function getReferrer() {
+    return $_SERVER['HTTP_REFERER'] ?? '';
+}
+
+function sanitizeInput($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
+
+function generateTrackingUrl($offerId, $subId = '', $source = '', $campaign = '', $keyword = '') {
+    global $base_url;
+    
+    $url = "$base_url/track.php?offer=$offerId";
+    
+    if (!empty($subId)) {
+        $url .= "&sub_id=" . urlencode($subId);
+    }
+    
+    if (!empty($source)) {
+        $url .= "&source=" . urlencode($source);
+    }
+    
+    if (!empty($campaign)) {
+        $url .= "&campaign=" . urlencode($campaign);
+    }
+    
+    if (!empty($keyword)) {
+        $url .= "&keyword=" . urlencode($keyword);
+    }
+    
+    return $url;
+}
+
+function getAdComboOfferUrl($offerId, $clickId) {
+    global $adcombo_api_key;
+    
+    return "https://adcombo.com/api/v2/order.confirmed?api_key=$adcombo_api_key&offer_id=$offerId&transaction_id=$clickId";
+}
+
+function callAdComboApi($endpoint, $params = []) {
+    global $adcombo_api_key, $adcombo_api_url;
+    
+    $params['api_key'] = $adcombo_api_key;
+    $url = $adcombo_api_url . $endpoint . '?' . http_build_query($params);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    return json_decode($response, true);
 }
 ?>
