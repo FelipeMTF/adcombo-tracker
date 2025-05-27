@@ -1,10 +1,14 @@
 <?php
-// Configurações do banco de dados usando variáveis do Railway
-$db_host = getenv('MYSQLHOST') ?: 'mysql.railway.internal';
-$db_name = getenv('MYSQL_DATABASE') ?: 'railway';
-$db_user = getenv('MYSQLUSER') ?: 'root';
-$db_pass = getenv('MYSQL_ROOT_PASSWORD') ?: '';
-$db_port = getenv('MYSQLPORT') ?: '3306';
+// Usar a URL pública do MySQL
+$mysql_url = getenv('MYSQL_PUBLIC_URL') ?: 'mysql://root:VJKFHyGJyaAAJEXoMxwDghkmzLJVebKP@tramway.proxy.rlwy.net:33459/railway';
+
+// Parse da URL de conexão
+$url_parts = parse_url($mysql_url);
+$db_host = $url_parts['host'];
+$db_port = $url_parts['port'];
+$db_user = $url_parts['user'];
+$db_pass = $url_parts['pass'];
+$db_name = ltrim($url_parts['path'], '/');
 
 // Configurações do AdCombo
 $adcombo_api_key = getenv('ADCOMBO_API_KEY') ?: '';
@@ -27,7 +31,7 @@ try {
     $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_TIMEOUT => 3, // Timeout em segundos
+        PDO::ATTR_TIMEOUT => 5, // Aumentei o timeout para 5 segundos
     ];
     
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
@@ -40,8 +44,6 @@ try {
         die("Erro na conexão com o banco de dados: " . $e->getMessage());
     }
 }
-
-// Resto do código permanece o mesmo...
 
 // Funções utilitárias
 function generateClickId() {
