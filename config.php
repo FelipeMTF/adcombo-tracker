@@ -1,9 +1,10 @@
 <?php
-// Configurações do banco de dados
-$db_host = getenv('DB_HOST') ?: 'localhost';
-$db_name = getenv('DB_NAME') ?: 'adstrax_db';
-$db_user = getenv('DB_USER') ?: 'root';
-$db_pass = getenv('DB_PASS') ?: '';
+// Configurações do banco de dados usando variáveis do Railway
+$db_host = getenv('MYSQLHOST') ?: 'mysql.railway.internal';
+$db_name = getenv('MYSQL_DATABASE') ?: 'railway';
+$db_user = getenv('MYSQLUSER') ?: 'root';
+$db_pass = getenv('MYSQLPASSWORD') ?: '';
+$db_port = getenv('MYSQLPORT') ?: '3306';
 
 // Configurações do AdCombo
 $adcombo_api_key = getenv('ADCOMBO_API_KEY') ?: '';
@@ -19,9 +20,18 @@ $app_email = 'contato@adstrax.com.br';
 
 // Conexão com o banco de dados
 try {
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    // Use a string de conexão completa com a porta
+    $dsn = "mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8mb4";
+    
+    // Opções adicionais para a conexão
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_TIMEOUT => 3, // Timeout em segundos
+    ];
+    
+    $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+    
 } catch (PDOException $e) {
     // Em produção, não exibir a mensagem de erro detalhada
     if (getenv('APP_ENV') === 'production') {
