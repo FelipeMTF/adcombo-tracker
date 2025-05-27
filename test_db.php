@@ -5,19 +5,24 @@ error_reporting(E_ALL);
 
 echo "<h1>Teste de Conexão com o Banco de Dados</h1>";
 
-// Obter variáveis de ambiente do Railway
-$db_host = getenv('MYSQLHOST') ?: 'mysql.railway.internal';
-$db_name = getenv('MYSQL_DATABASE') ?: 'railway';
-$db_user = getenv('MYSQLUSER') ?: 'root';
-$db_pass = getenv('MYSQL_ROOT_PASSWORD') ?: '';
-$db_port = getenv('MYSQLPORT') ?: '3306';
+// Usar a URL pública do MySQL
+$mysql_url = getenv('MYSQL_PUBLIC_URL') ?: 'mysql://root:VJKFHyGJyaAAJEXoMxwDghkmzLJVebKP@tramway.proxy.rlwy.net:33459/railway';
+echo "<p><strong>MySQL URL:</strong> " . $mysql_url . "</p>";
 
-echo "<p><strong>Variáveis de Ambiente:</strong></p>";
+// Parse da URL de conexão
+$url_parts = parse_url($mysql_url);
+$db_host = $url_parts['host'];
+$db_port = $url_parts['port'];
+$db_user = $url_parts['user'];
+$db_pass = $url_parts['pass'];
+$db_name = ltrim($url_parts['path'], '/');
+
+echo "<p><strong>Variáveis de Conexão:</strong></p>";
 echo "<ul>";
 echo "<li>Host: $db_host</li>";
+echo "<li>Port: $db_port</li>";
 echo "<li>Database: $db_name</li>";
 echo "<li>User: $db_user</li>";
-echo "<li>Port: $db_port</li>";
 echo "</ul>";
 
 try {
@@ -29,7 +34,7 @@ try {
     $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_TIMEOUT => 3,
+        PDO::ATTR_TIMEOUT => 5,
     ];
     
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
@@ -58,7 +63,7 @@ try {
     
     echo "<h2>Possíveis soluções:</h2>";
     echo "<ol>";
-    echo "<li>Verifique se as variáveis de ambiente estão configuradas corretamente no Render</li>";
+    echo "<li>Verifique se a URL do MySQL está correta</li>";
     echo "<li>Confirme se o banco de dados MySQL no Railway está em execução</li>";
     echo "<li>Verifique se o IP do Render está na lista de permissões do Railway (se aplicável)</li>";
     echo "<li>Tente reiniciar o serviço no Render</li>";
