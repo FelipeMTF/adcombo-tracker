@@ -12,11 +12,6 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Função para sanitizar input
-function sanitizeInput($input) {
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
-
 // Verificar se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = sanitizeInput($_POST['email'] ?? '');
