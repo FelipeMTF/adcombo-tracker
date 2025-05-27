@@ -24,6 +24,19 @@ try {
     ");
     echo "<p>✅ Tabela 'offers' criada com sucesso!</p>";
 
+    // Criar tabela de redefinição de senha
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS password_resets (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(100) NOT NULL,
+        token VARCHAR(100) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY (email)
+        )
+    ");
+    echo "<p>✅ Tabela 'password_resets' criada com sucesso!</p>";
+    
     // Criar tabela de usuários
     $pdo->exec("
     CREATE TABLE IF NOT EXISTS users (
