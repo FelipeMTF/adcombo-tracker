@@ -1,9 +1,19 @@
 <?php
-include '../config.php';
-include '../auth.php';
+// Verificar se a sessão já está ativa antes de iniciá-la
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once 'config.php';
 
 // Verificar se o usuário está logado
-requireLogin();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Resto do código permanece o mesmo
+?>
 
 // Obter estatísticas
 $userId = $_SESSION['user_id'];
