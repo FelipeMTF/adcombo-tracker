@@ -1,77 +1,106 @@
 <?php
 include 'config.php';
 
-// Obter parâmetros da URL
-$action = $_GET['action'] ?? '';
-$offer_id = $_GET['offer_id'] ?? '';
-$click_id = $_GET['click_id'] ?? '';
-$status = $_GET['status'] ?? '';
-$reason = $_GET['reason'] ?? '';
+// Obter parâmetros do postback
+$clickId = $_GET['transaction_id'] ?? '';
+$status = strtolower($_GET['status'] ?? '');
+$subStatus = $_GET['sub_status'] ?? '';
+$payout = floatval($_GET['payout'] ?? 0);
 
-// Registrar em log para depuração
-file_put_contents('postback_log.txt', date('Y-m-d H:i:s') . " - " . json_encode($_GET) . "\n", FILE_APPEND);
-
-// Verificar parâmetros obrigatórios
-if (empty($action) || empty($offer_id) || empty($click_id)) {
+// Validar parâmetros
+if (empty($clickId)) {
     http_response_code(400);
-    echo "Parâmetros inválidos";
-    exit;
+    die("Erro: ID de transação não especificado.");
 }
 
-// Verificar se o clique existe
-$stmt = $pdo->prepare("SELECT * FROM clicks WHERE click_id = ? AND offer_id = ?");
-$stmt->execute([$click_id, $offer_id]);
-$click = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$click) {
-    http_response_code(404);
-    echo "Clique não encontrado";
-    exit;
+if (empty($status)) {
+    http_response_code(400);
+    die("Erro: Status não especificado.");
 }
 
-// Verificar se já existe uma conversão para este clique
-$stmt = $pdo->prepare("SELECT * FROM conversions WHERE click_id = ? AND status = ?");
-$stmt->execute([$click_id, $action]);
-$existing = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if ($existing) {
-    // Já existe uma conversão deste tipo para este clique
-    echo "Conversão já registrada";
-    exit;
-}
-
-// Processar com base na ação
-switch ($action) {
-    case 'lead':
-        // Registrar lead
-        $stmt = $pdo->prepare("INSERT INTO conversions (click_id, offer_id, status, sub_status, timestamp) VALUES (?, ?, 'lead', ?, NOW())");
-        $stmt->execute([$click_id, $offer_id, $status]);
+// Mapear status do AdCombo para nosso sistema
+switch ($status) {
+    case 'confirmed':
+    case 'confirmed_for_initial':
+        $status = 'lead';
         break;
-        
+    case 'confirmed_for_complete':
+    case 'confirmed_for_delivery':
+        $status = 'sale';
+        break;
     case 'hold':
-        // Registrar hold
-        $stmt = $pdo->prepare("INSERT INTO conversions (click_id, offer_id, status, timestamp) VALUES (?, ?, 'hold', NOW())");
-        $stmt->execute([$click_id, $offer_id]);
+    case 'hold_for_complete':
+    case 'hold_for_delivery':
+        $status = 'hold';
         break;
-        
-    case 'reject':
-        // Registrar rejeição
-        $stmt = $pdo->prepare("INSERT INTO conversions (click_id, offer_id, status, sub_status, timestamp) VALUES (?, ?, 'reject', ?, NOW())");
-        $stmt->execute([$click_id, $offer_id, $reason]);
+    case 'rejected':
+    case 'rejected_for_complete':
+    case 'rejected_for_delivery':
+        $status = 'reject';
         break;
-        
-    case 'sale':
-        // Registrar venda
-        $stmt = $pdo->prepare("INSERT INTO conversions (click_id, offer_id, status, timestamp) VALUES (?, ?, 'sale', NOW())");
-        $stmt->execute([$click_id, $offer_id]);
-        break;
-        
     default:
-        http_response_code(400);
-        echo "Ação desconhecida";
-        exit;
+        // Status desconhecido, usar como está
+        break;
 }
 
-// Responder com sucesso
-echo "OK";
+try {
+    // Verificar se o clique existe
+    $stmt = $pdo->prepare("SELECT * FROM clicks WHERE click_id = ?");
+    $stmt->execute([$clickId]);
+    $click = $stmt->fetch();
+    
+    if (!$click) {
+        http_response_code(404);
+        die("Erro: Clique não encontrado.");
+    }
+    
+    $offerId = $click['offer_id'];
+    
+    // Verificar se já existe uma conversão para este clique
+    $stmt = $pdo->prepare("SELECT * FROM conversions WHERE click_id = ?");
+    $stmt->execute([$clickId]);
+    $existingConversion = $stmt->fetch();
+    
+    if ($existingConversion) {
+        // Atualizar conversão existente
+        $stmt = $pdo->prepare("
+            UPDATE conversions 
+            SET status = ?, sub_status = ?, payout = ?, timestamp = NOW()
+            WHERE click_id = ?
+        ");
+        
+        $stmt->execute([
+            $status,
+            $subStatus,
+            $payout,
+            $clickId
+        ]);
+        
+        echo "Conversão atualizada com sucesso.";
+    } else {
+        // Inserir nova conversão
+        $stmt = $pdo->prepare("
+            INSERT INTO conversions 
+            (click_id, offer_id, status, sub_status, payout) 
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $clickId,
+            $offerId,
+            $status,
+            $subStatus,
+            $payout
+        ]);
+        
+        echo "Conversão registrada com sucesso.";
+    }
+    
+} catch (PDOException $e) {
+    // Log do erro
+    error_log("Erro no postback: " . $e->getMessage());
+    
+    http_response_code(500);
+    die("Erro interno no servidor.");
+}
 ?>
