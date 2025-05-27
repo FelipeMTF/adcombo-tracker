@@ -67,7 +67,7 @@ $registered = isset($_GET['registered']) && $_GET['registered'] == 1;
                 <div class="card shadow">
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
-                            <img src="assets/img/logo.png" alt="AdStrax" class="logo mb-4" style="max-height: 80px;">
+                            <img src="/public/assets/images/logo.png" alt="AdStrax" class="logo mb-4" style="max-height: 80px;">
                             <h2>Acesse sua conta</h2>
                         </div>
                         
