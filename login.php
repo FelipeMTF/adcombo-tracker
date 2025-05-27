@@ -1,180 +1,113 @@
 <?php
-session_start();
-include 'config.php';
+require_once 'config.php';
 
-// Verificar se já está logado
+// Iniciar sessão
+session_start();
+
+// Verificar se o usuário já está logado
 if (isset($_SESSION['user_id'])) {
-    header('Location: index.php');
+    header("Location: dashboard.php");
     exit;
 }
 
-// Processar login
+// Verificar se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $email = sanitizeInput($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
     
-    // Verificar credenciais
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $errors = [];
     
-    if ($user && password_verify($password, $user['password'])) {
-        // Login bem-sucedido
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_name'] = $user['name'];
-        $_SESSION['user_email'] = $user['email'];
+    // Validar campos
+    if (empty($email)) {
+        $errors[] = "Email é obrigatório";
+    }
+    
+    if (empty($password)) {
+        $errors[] = "Senha é obrigatória";
+    }
+    
+    // Se não houver erros, verificar credenciais
+    if (empty($errors)) {
+        $stmt = $pdo->prepare("SELECT id, name, email, password FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
         
-        // Redirecionar para o dashboard
-        header('Location: index.php');
-        exit;
-    } else {
-        $error_message = "Email ou senha incorretos.";
+        if ($user && password_verify($password, $user['password'])) {
+            // Login bem-sucedido, criar sessão
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
+            
+            // Redirecionar para o dashboard
+            header("Location: dashboard.php");
+            exit;
+        } else {
+            $errors[] = "Email ou senha incorretos";
+        }
     }
 }
-?>
 
+// Verificar se o usuário acabou de se registrar
+$registered = isset($_GET['registered']) && $_GET['registered'] == 1;
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <div class="login-logo">
-    <img src="/public/assets/img/logo.png" alt="AdStrax" class="img-fluid" style="max-width: 250px;">
-   <h5 class="mt-3 text-muted">Sistema de Tracking para Afiliados</h5>
-    </div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AdCombo Tracker</title>
+    <title>Login - AdStrax</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: #fff;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-        }
-        .login-container {
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 450px;
-            width: 100%;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo img {
-            max-width: 180px;
-            height: auto;
-        }
-        .form-control {
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        .form-control:focus {
-            background-color: rgba(255, 255, 255, 0.15);
-            color: #fff;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-        .btn-primary {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-            border: none;
-            padding: 15px;
-            font-weight: 600;
-            border-radius: 10px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #ff8e53, #ff6b6b);
-            transform: translateY(-2px);
-            box-shadow: 0 7px 20px rgba(255, 107, 107, 0.5);
-        }
-        .forgot-password {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .forgot-password a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .forgot-password a:hover {
-            color: #fff;
-            text-decoration: underline;
-        }
-        h1 {
-            font-weight: 700;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        h2 {
-            font-weight: 600;
-            font-size: 22px;
-            margin-bottom: 20px;
-        }
-        .alert {
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .login-footer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
 </head>
-<body>
-    <div class="login-container">
-        <div class="logo">
-            <!-- Substitua pelo caminho do seu logo -->
-            <img src="/public/assets/img/logo.png" alt="AdCombo Tracker Logo">
-        </div>
-        
-        <h2 class="text-center mb-4">Acesse sua conta</h2>
-        
-        <?php if (isset($error_message)): ?>
-            <div class="alert alert-danger"><?php echo $error_message; ?></div>
-        <?php endif; ?>
-        
-        <form method="post">
-            <div class="mb-3">
-                <input type="email" class="form-control" name="email" placeholder="Email" required>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-5">
+                <div class="card shadow">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <img src="assets/img/logo.png" alt="AdStrax" class="logo mb-4" style="max-height: 80px;">
+                            <h2>Acesse sua conta</h2>
+                        </div>
+                        
+                        <?php if ($registered): ?>
+                            <div class="alert alert-success">
+                                Conta criada com sucesso! Faça login para continuar.
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($errors)): ?>
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    <?php foreach ($errors as $error): ?>
+                                        <li><?php echo $error; ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <form method="POST" action="">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="<?php echo $email ?? ''; ?>" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="password" class="form-label">Senha</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p><a href="forgot-password.php">Esqueceu sua senha?</a></p>
+                            <p>Não tem uma conta? <a href="register.php">Registre-se</a></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <input type="password" class="form-control" name="password" placeholder="Senha" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Entrar</button>
-        </form>
-        
-        <div class="forgot-password">
-            <a href="forgot_password.php">Esqueceu sua senha?</a>
-        </div>
-        
-        <div class="login-footer">
-            &copy; <?php echo date('Y'); ?> AdCombo Tracker - Todos os direitos reservados
         </div>
     </div>
     
