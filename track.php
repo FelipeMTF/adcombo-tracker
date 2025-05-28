@@ -50,6 +50,9 @@ try {
         $referrer
     ]);
     
+    // Log do clique
+    logMessage("Novo clique registrado: $clickId para oferta $offerId");
+    
     // Construir URL de redirecionamento para a landing page
     $landingUrl = $offer['landing_url'];
     
@@ -79,8 +82,8 @@ try {
     exit;
     
 } catch (PDOException $e) {
-    // Log do erro (não exibir para o usuário em produção)
-    error_log("Erro no tracking: " . $e->getMessage());
+    // Log do erro
+    logMessage("Erro no tracking: " . $e->getMessage(), 'error');
     
     // Redirecionar para a landing page mesmo com erro
     if (isset($offer) && isset($offer['landing_url'])) {
