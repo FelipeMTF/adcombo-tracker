@@ -1,0 +1,400 @@
+<?php
+// Verificar se a sessão já está ativa antes de iniciá-la
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Incluir arquivo de configuração
+require_once('../config.php');
+
+// Verificar se o usuário está logado
+if (!isset($_SESSION['user_id'])) {
+    header("Location: /login.php");
+    exit;
+}
+
+// Obter dados do usuário
+$userId = $_SESSION['user_id'];
+$userName = $_SESSION['user_name'] ?? 'Usuário';
+
+// Processar formulário de nova oferta
+$message = '';
+$messageType = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_offer') {
+    $offerName = $_POST['offer_name'] ?? '';
+    $offerId = $_POST['offer_id'] ?? '';
+    $payout = $_POST['payout'] ?? 0;
+    $landingUrl = $_POST['landing_url'] ?? '';
+    $postbackUrl = $_POST['postback_url'] ?? '';
+    
+    // Validar campos obrigatórios
+    if (empty($offerName) || empty($offerId) || empty($landingUrl)) {
+        $message = 'Todos os campos obrigatórios devem ser preenchidos.';
+        $messageType = 'danger';
+    } else {
+        try {
+            // Verificar se a oferta já existe
+            $stmt = $pdo->prepare("SELECT * FROM offers WHERE offer_id = ? AND user_id = ?");
+            $stmt->execute([$offerId, $userId]);
+            
+            if ($stmt->rowCount() > 0) {
+                $message = 'Esta oferta já está cadastrada.';
+                $messageType = 'warning';
+            } else {
+                // Inserir nova oferta
+                $stmt = $pdo->prepare("
+                    INSERT INTO offers (user_id, offer_id, name, payout, landing_url, postback_url)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ");
+                
+                $stmt->execute([$userId, $offerId, $offerName, $payout, $landingUrl, $postbackUrl]);
+                
+                $message = 'Oferta adicionada com sucesso!';
+                $messageType = 'success';
+            }
+        } catch (PDOException $e) {
+            $message = 'Erro ao adicionar oferta: ' . $e->getMessage();
+            $messageType = 'danger';
+        }
+    }
+}
+
+// Processar exclusão de oferta
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $offerId = $_GET['id'];
+    
+    try {
+        $stmt = $pdo->prepare("DELETE FROM offers WHERE id = ? AND user_id = ?");
+        $stmt->execute([$offerId, $userId]);
+        
+        if ($stmt->rowCount() > 0) {
+            $message = 'Oferta excluída com sucesso!';
+            $messageType = 'success';
+        } else {
+            $message = 'Oferta não encontrada ou você não tem permissão para excluí-la.';
+            $messageType = 'warning';
+        }
+    } catch (PDOException $e) {
+        $message = 'Erro ao excluir oferta: ' . $e->getMessage();
+        $messageType = 'danger';
+    }
+}
+
+// Obter lista de ofertas
+try {
+    $stmt = $pdo->prepare("
+        SELECT * FROM offers 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC
+    ");
+    $stmt->execute([$userId]);
+    $offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $message = 'Erro ao carregar ofertas: ' . $e->getMessage();
+    $messageType = 'danger';
+    $offers = [];
+}
+
+// Verificar se é para mostrar o formulário de nova oferta
+$showForm = isset($_GET['action']) && $_GET['action'] === 'new';
+?>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ofertas - AdStrax</title>
+    <link rel="icon" type="image/png" href="/public/assets/images/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
+        }
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .navbar {
+            background-color: var(--primary-color);
+            padding: 0.5rem 1rem;
+        }
+        .card {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border: none;
+            border-radius: 0.35rem;
+        }
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            padding: 0.75rem 1.25rem;
+        }
+        .card-header h5 {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+        .dropdown-menu {
+            font-size: 0.85rem;
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+        }
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+        }
+        .dropdown-item i {
+            margin-right: 0.5rem;
+            width: 1rem;
+            text-align: center;
+        }
+        .tracking-url {
+            background-color: #f8f9fc;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .copy-btn {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <img src="/public/assets/images/logo.png" alt="AdStrax" height="40" onerror="this.src='https://via.placeholder.com/120x40?text=AdStrax'">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard/offers.php"><i class="fas fa-tag"></i> Ofertas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard/reports.php"><i class="fas fa-chart-bar"></i> Relatórios</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($userName); ?>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/dashboard/profile.php"><i class="fas fa-user-cog"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="/dashboard/settings.php"><i class="fas fa-cog"></i> Configurações</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout.php"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show" role="alert">
+                <?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Ofertas</h1>
+            <a href="/dashboard/offers.php?action=new" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Nova Oferta
+            </a>
+        </div>
+        
+        <?php if ($showForm): ?>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Nova Oferta</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/dashboard/offers.php">
+                        <input type="hidden" name="action" value="add_offer">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="offer_name" class="form-label">Nome da Oferta *</label>
+                                <input type="text" class="form-control" id="offer_name" name="offer_name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="offer_id" class="form-label">ID da Oferta (AdCombo) *</label>
+                                <input type="text" class="form-control" id="offer_id" name="offer_id" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="payout" class="form-label">Payout (R$)</label>
+                                <input type="number" class="form-control" id="payout" name="payout" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="landing_url" class="form-label">URL da Landing Page *</label>
+                                <input type="url" class="form-control" id="landing_url" name="landing_url" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="postback_url" class="form-label">URL de Postback (opcional)</label>
+                            <input type="url" class="form-control" id="postback_url" name="postback_url">
+                            <div class="form-text">
+                                Deixe em branco para usar o postback padrão do AdStrax.
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <a href="/dashboard/offers.php" class="btn btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Salvar Oferta</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        <?php endif; ?>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Minhas Ofertas</h5>
+            </div>
+            <div class="card-body">
+                <?php if (empty($offers)): ?>
+                    <div class="text-center py-5">
+                        <i class="fas fa-tag fa-3x text-muted mb-3"></i>
+                        <p class="mb-0">Você ainda não tem ofertas cadastradas.</p>
+                        <p class="mb-3">Clique no botão "Nova Oferta" para começar.</p>
+                        <a href="/dashboard/offers.php?action=new" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Nova Oferta
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>ID da Oferta</th>
+                                    <th>Payout</th>
+                                    <th>Status</th>
+                                    <th>Data de Criação</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($offers as $offer): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($offer['name']); ?></td>
+                                        <td><?php echo htmlspecialchars($offer['offer_id']); ?></td>
+                                        <td>R$ <?php echo number_format($offer['payout'], 2, ',', '.'); ?></td>
+                                        <td>
+                                            <?php if ($offer['status'] === 'active'): ?>
+                                                <span class="badge bg-success">Ativa</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">Inativa</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?php echo date('d/m/Y H:i', strtotime($offer['created_at'])); ?></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#trackingModal<?php echo $offer['id']; ?>">
+                                                <i class="fas fa-link"></i> Link
+                                            </button>
+                                            <a href="/dashboard/offers.php?action=edit&id=<?php echo $offer['id']; ?>" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="/dashboard/offers.php?action=delete&id=<?php echo $offer['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta oferta?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Modal de Link de Rastreamento -->
+                                    <div class="modal fade" id="trackingModal<?php echo $offer['id']; ?>" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Link de Rastreamento - <?php echo htmlspecialchars($offer['name']); ?></h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Use o link abaixo para rastrear cliques para esta oferta:</p>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Link de Rastreamento Básico:</label>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control tracking-url" value="https://adstrax.com.br/track.php?offer_id=<?php echo urlencode($offer['offer_id']); ?>" readonly>
+                                                            <button class="btn btn-outline-secondary copy-btn" type="button" data-clipboard-text="https://adstrax.com.br/track.php?offer_id=<?php echo urlencode($offer['offer_id']); ?>">
+                                                                <i class="fas fa-copy"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <p>Para rastreamento avançado, adicione os parâmetros sub_id:</p>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Link com Sub IDs:</label>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control tracking-url" value="https://adstrax.com.br/track.php?offer_id=<?php echo urlencode($offer['offer_id']); ?>&sub_id={campaignid}&sub_id2={adgroupid}&sub_id3={keyword}&sub_id4={creative}&sub_id5={placement}" readonly>
+                                                            <button class="btn btn-outline-secondary copy-btn" type="button" data-clipboard-text="https://adstrax.com.br/track.php?offer_id=<?php echo urlencode($offer['offer_id']); ?>&sub_id={campaignid}&sub_id2={adgroupid}&sub_id3={keyword}&sub_id4={creative}&sub_id5={placement}">
+                                                                <i class="fas fa-copy"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="alert alert-info">
+                                                        <h6 class="alert-heading">Configuração do Postback na AdCombo:</h6>
+                                                        <p class="mb-0">Configure o seguinte URL de postback na sua conta AdCombo:</p>
+                                                        <div class="tracking-url mt-2">
+                                                            https://adstrax.com.br/postback.php?click_id={clickid}&transaction_id={transactionid}&status={status}&payout={payout}&offer_id=<?php echo urlencode($offer['offer_id']); ?>&sub_id={subid}&sub_id2={subid2}&sub_id3={subid3}&sub_id4={subid4}&sub_id5={subid5}&ip={ip}&country={country}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar clipboard.js
+            new ClipboardJS('.copy-btn').on('success', function(e) {
+                const button = e.trigger;
+                const originalText = button.innerHTML;
+                
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                
+                setTimeout(function() {
+                    button.innerHTML = originalText;
+                }, 2000);
+                
+                e.clearSelection();
+            });
+        });
+    </script>
+</body>
+</html>
